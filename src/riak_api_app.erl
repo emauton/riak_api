@@ -27,14 +27,6 @@
 -export([start/2,
          stop/1]).
 
--define(SERVICES, [{riak_api_basic_pb_service, 1, 2},
-                   {riak_api_basic_pb_service, 7, 8},
-                   %% Note: Riak core cannot register this itself,
-                   %% because it is started before riak_api.
-                   {riak_core_pb_bucket, 19, 22},
-                   {riak_core_pb_bucket, 29, 30}
-                  ]).
-
 %% @doc The application:start callback.
 -spec start(Type, StartArgs)
            -> {ok, Pid} | {ok, Pid, State} | {error, Reason} when
@@ -51,7 +43,6 @@ start(_Type, _StartArgs) ->
     case riak_api_sup:start_link() of
         {ok, Pid} ->
             riak_core:register(riak_api, [{stat_mod, riak_api_stat}]),
-            ok = riak_api_pb_service:register(?SERVICES),
             {ok, Pid};
         {error, Reason} ->
             {error, Reason}
@@ -60,5 +51,4 @@ start(_Type, _StartArgs) ->
 %% @doc The application:stop callback.
 -spec stop(State::term()) -> ok.
 stop(_State) ->
-    ok = riak_api_pb_service:deregister(?SERVICES),
     ok.

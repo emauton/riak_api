@@ -1,3 +1,6 @@
+This fork of riak_api removes Riak-specific code so that the protobuf service
+infrastructure can be reused for other riak_core projects.
+
 # `riak_api` - Riak Client APIs
 
 This OTP application encapsulates services for presenting Riak's
