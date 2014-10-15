@@ -9,6 +9,7 @@
 -export([init/0,
          decode/2,
          encode/1,
+         encode_error/1,
          process/2,
          process_stream/3]).
 
@@ -42,6 +43,9 @@ encode(ok) ->
     {ok, <<102,$o,$k>>};
 encode(_) ->
     error.
+
+encode_error(_) ->
+    {ok, <<0,$e,$r,$r,$o,$r>>}.
 
 process(bigreq, State) ->
     {reply, foo, State};
@@ -99,6 +103,7 @@ setup() ->
 
     OldListeners = app_helper:get_env(riak_api, pb, [{"127.0.0.1", 8087}]),
     application:set_env(riak_api, pb, [{"127.0.0.1", 32767}]),
+    application:set_env(riak_api, error_service, ?MODULE),
 
     [ application:start(A) || A <- Deps ],
     riak_core:wait_for_application(riak_api),

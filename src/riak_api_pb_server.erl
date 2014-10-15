@@ -42,7 +42,8 @@
           req,                % current request
           states :: orddict:orddict(),    % per-service connection state
           inbuffer = <<>>, % when an incomplete message comes in, we have to unpack it ourselves
-          outbuffer = riak_api_pb_frame:new() :: riak_api_pb_frame:buffer() % frame buffer which we can use to optimize TCP sends
+          outbuffer = riak_api_pb_frame:new() :: riak_api_pb_frame:buffer(), % frame buffer which we can use to optimize TCP sends
+          errors :: module()
          }).
 
 -type format() :: {format, term()} | {format, io:format(), [term()]}.
@@ -71,7 +72,13 @@ init([]) ->
                                         orddict:store(Service, Service:init(), States)
                                 end,
                                 orddict:new(), riak_api_pb_registrar:services()),
-    {ok, #state{states=ServiceStates}}.
+    % The module handling generic errors from riak_api.
+    % Must be configured rather than registered as it may be called
+    % before registrations take place.
+    % It must implement an encode_error/1 callback which takes a
+    % message and returns a suitable error protobuf.
+    {ok, ErrorService} = application:get_env(riak_api, error_service),
+    {ok, #state{states=ServiceStates, errors=ErrorService}}.
 
 %% @doc The handle_call/3 gen_server callback.
 -spec handle_call(Message::term(), From::{pid(),term()}, State::#state{}) -> {reply, Message::term(), NewState::#state{}}.
@@ -320,12 +327,8 @@ send_error({format, Term}, State) ->
     send_error({format, "~p", [Term]}, State);
 send_error({format, Fmt, TList}, State) ->
     send_error(io_lib:format(Fmt, TList), State);
-send_error(Message, State) when is_list(Message) orelse is_binary(Message) ->
-    %% TODO: provide a service for encoding error messages? While
-    %% extra work, it would follow the pattern. On the other hand,
-    %% maybe it's too much abstraction. This is a hack, allowing us
-    %% to avoid including the header file.
-    Packet = riak_pb_codec:encode({rpberrorresp, Message, 0}),
+send_error(Message, #state{errors=ErrorService}=State) when is_list(Message) orelse is_binary(Message) ->
+    {ok, Packet} = ErrorService:encode_error(Message),
     send_message(Packet, State).
 
 %% @doc Formats the terms with the given string and then sends an

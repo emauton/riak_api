@@ -1,5 +1,18 @@
-This fork of riak_api removes Riak-specific code so that the protobuf service
-infrastructure can be reused for other riak_core projects.
+This fork of [riak_api](https://github.com/basho/riak_api) from
+[Basho](https://basho.com) removes Riak-specific code so that the protobuf
+service infrastructure can be reused for other `riak_core` projects.
+
+It is based off [tag 1.4.10](https://github.com/basho/riak_api/tree/1.4.10).
+
+One slightly thorny change was disentangling (generic) error handling in
+`riak_api_pb_server` from `riak_pb_codec`. Since errors can (and do, in tests)
+occur before services are registered, we use an application environment
+variable to set up the module that should handle error encoding.
+
+    {ok, ErrorService} = application:get_env(riak_api, error_service),
+
+Typically, you will add the `encode_error/1` callback (which just takes a
+string message) to one of your `riak_api_pb_service` modules.
 
 # `riak_api` - Riak Client APIs
 
