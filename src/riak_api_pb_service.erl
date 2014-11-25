@@ -196,6 +196,8 @@
     {done, NewState::term()} |
     {error, Error::process_error(), NewState::term()}.
 
+-export_type([process_error/0, stream_reply/0]).
+
 %% @doc Registers a number of services at once.
 %% @see register/3
 -spec register([registration()]) -> ok | {error, Reason::term()}.
