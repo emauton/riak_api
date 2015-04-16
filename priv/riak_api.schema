@@ -4,7 +4,8 @@
 %% It needs to export encode_error/1, taking a string message.
 {mapping, "listener.protobuf.error_service", "riak_api.error_service", [
   {datatype, atom},
-  {default, {{error_service}}}
+  {default, {{error_service}} },
+  hidden
 ]}.
 
 %% @doc listener.protobuf.<name> is an IP address and TCP port that the Riak
@@ -31,7 +32,8 @@
   {datatype, integer},
   {default, 128},
   {commented, 128},
-  {validators, ["greater_than_zero"]}
+  {validators, ["greater_than_zero"]},
+  hidden
 ]}.
 
 {validator,
