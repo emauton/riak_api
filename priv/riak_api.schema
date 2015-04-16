@@ -2,7 +2,7 @@
 
 %% @doc Service module to used to encode generic (i.e. riak_api-level) errors.
 %% It needs to export encode_error/1, taking a string message.
-{mapping, "listener.protobuf.error_service", "riak_api.error_service", [
+{mapping, "listener.error_service", "riak_api.error_service", [
   {datatype, atom},
   {default, {{error_service}} },
   hidden
