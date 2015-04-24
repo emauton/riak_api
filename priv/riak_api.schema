@@ -49,3 +49,11 @@
   {default, off},
   hidden
 ]}.
+
+%% @doc Turns on TCP keepalive for Protocol Buffers connections.
+%% This is equivalent to setting the SO_KEEPALIVE option on the socket.
+{mapping, "protobuf.keepalive", "riak_api.pb_keepalive", [
+  {datatype, flag},
+  {default, on},
+  hidden
+]}.
